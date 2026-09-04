@@ -754,5 +754,8 @@ enum ContainerStore {
             return data.count > limit ? text + "\n… [truncated]" : text
         }
         return "Binary data (\(data.count) bytes) — not text."
+        var deviceUUID: String {
+    return UIDevice.current.identifierForVendor?.uuidString ?? "Unknown"
+}
     }
 }
