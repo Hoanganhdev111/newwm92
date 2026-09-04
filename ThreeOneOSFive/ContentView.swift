@@ -1,9 +1,22 @@
-// ContentView.swift
-// ThreeOneOSFive
 //
-// SỬA: Gắn đúng view vào các tab
+//  ContentView.swift
+//  ThreeOneOSFive
+//
+//  SỬA: Dùng AppSection từ AppTabNavigationState.swift
+//
 
 import SwiftUI
+
+class AppManager: ObservableObject {
+    @Published var selectedApp: AppInfo?
+    @Published var containerPath: String?
+    @Published var apps: [AppInfo] = []
+    @Published var isLoading: Bool = false
+
+    var deviceUUID: String {
+        UIDevice.current.identifierForVendor?.uuidString ?? "Unknown"
+    }
+}
 
 struct ContentView: View {
     @StateObject private var appManager = AppManager()
@@ -14,7 +27,6 @@ struct ContentView: View {
 
             // ─── Dashboard ────────────────────────────────────────────────
             NavigationView {
-                // Thay bằng view thật của 3105
                 Text("Dashboard")
                     .navigationTitle("3105")
             }
@@ -26,7 +38,7 @@ struct ContentView: View {
                 AppDataBrowserView(appManager: appManager)
                     .navigationTitle("Apps")
             }
-            .tabItem { Label("Apps", systemImage: "folder.fill") }
+            .tabItem { Label("Apps", systemimage: "folder.fill") }
             .tag(AppSection.files)
 
             // ─── Patch ────────────────────────────────────────────────────
@@ -34,7 +46,7 @@ struct ContentView: View {
                 PatchProjectsView()
                     .navigationTitle("Patch")
             }
-            .tabItem { Label("Patch", systemImage: "wrench.and.screwdriver.fill") }
+            .tabItem { Label("Patch", systemimage: "wrench.and.screwdriver.fill") }
             .tag(AppSection.patch)
 
             // ─── Cleaner ──────────────────────────────────────────────────
@@ -42,7 +54,7 @@ struct ContentView: View {
                 CleanerView()
                     .navigationTitle("Cleaner")
             }
-            .tabItem { Label("Cleaner", systemImage: "trash.fill") }
+            .tabItem { Label("Cleaner", systemimage: "trash.fill") }
             .tag(AppSection.cleaner)
 
             // ─── WallpaperLab ─────────────────────────────────────────────
@@ -50,7 +62,7 @@ struct ContentView: View {
                 WallpaperLabView()
                     .navigationTitle("Wallpaper")
             }
-            .tabItem { Label("Wallpaper", systemImage: "photo.fill") }
+            .tabItem { Label("Wallpaper", systemimage: "photo.fill") }
             .tag(AppSection.wallpaper)
 
             // ─── Inject (MỚI) ─────────────────────────────────────────────
@@ -59,7 +71,7 @@ struct ContentView: View {
                     .navigationTitle("Inject")
                     .navigationBarTitleDisplayMode(.inline)
             }
-            .tabItem { Label("Inject", systemImage: "syringe.fill") }
+            .tabItem { Label("Inject", systemimage: "syringe.fill") }
             .tag(AppSection.inject)
 
             // ─── Settings ─────────────────────────────────────────────────
@@ -70,37 +82,6 @@ struct ContentView: View {
             .tabItem { Label("Settings", systemimage: "gear") }
             .tag(AppSection.settings)
         }
-        .accentColor(Color(hex: "#0a84ff"))
-        .onAppear {
-            // Tải danh sách app khi mở
-            appManager.loadApps()
-        }
-    }
-}
-
-// MARK: - Color Extension (cho hex)
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3:
-            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6:
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8:
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default:
-            (a, r, g, b) = (255, 0, 0, 0)
-        }
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
-        )
+        .accentColor(Color.blue)
     }
 }
