@@ -19,8 +19,13 @@ jobs:
           sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
           xcodebuild -version
       
-      - name: Build IPA (unsigned)
+      - name: List schemes (debug)
         run: |
+          xcodebuild -project ThreeOneOSFive.xcodeproj -list
+      
+      - name: Build IPA
+        run: |
+          # Thử với scheme "ThreeOneOSFive"
           xcodebuild -project ThreeOneOSFive.xcodeproj \
             -scheme ThreeOneOSFive \
             -sdk iphoneos \
@@ -29,13 +34,23 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
+            build || \
+          # Nếu không được, thử với scheme "3105"
+          xcodebuild -project ThreeOneOSFive.xcodeproj \
+            -scheme 3105 \
+            -sdk iphoneos \
+            -configuration Release \
+            -arch arm64 \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
             build
           
-          # Tạo thư mục Payload
+          # Tạo Payload
           mkdir -p Payload
-          cp -r build/Release-iphoneos/ThreeOneOSFive.app Payload/
+          cp -r build/Release-iphoneos/*.app Payload/ 2>/dev/null || cp -r build/Release-iphoneos/*.app Payload/
           
-          # Nén thành IPA
+          # Tạo IPA
           zip -r ThreeOneOSFive.ipa Payload
       
       - name: Upload IPA
