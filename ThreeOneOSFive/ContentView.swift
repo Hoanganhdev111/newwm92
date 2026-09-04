@@ -5,17 +5,6 @@
 
 import SwiftUI
 
-// MARK: - Tab identifiers
-enum AppSection: Int, CaseIterable {
-    case dashboard  = 0
-    case files      = 1
-    case patch      = 2
-    case cleaner    = 3
-    case wallpaper  = 4
-    case inject     = 5
-    case settings   = 6
-}
-
 struct ContentView: View {
     @StateObject private var appManager = AppManager()
     @State private var selectedSection: AppSection = .dashboard
