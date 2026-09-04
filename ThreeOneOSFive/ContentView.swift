@@ -1,45 +1,18 @@
 // ContentView.swift
 // ThreeOneOSFive
 //
-// MODIFIED: Added Inject tab (tab index 4, after existing tabs)
-// Existing tabs unchanged — Dashboard, Files, Patch, Cleaner, WallpaperLab, Settings
-// AppManager.selectedApp is the bridge between Apps tab and Inject tab
+// SỬA: Gắn đúng view vào các tab
 
 import SwiftUI
 
-// AppInfo must match whatever model 3105 already defines.
-// If it lives elsewhere, remove this stub.
-struct AppInfo: Identifiable, Hashable {
-    let id = UUID()
-    var bundleId: String
-    var name: String
-    var version: String
-    var path: String
-}
-
-// AppManager stub — replace with actual class from 3105 codebase.
-// Kept here so InjectDylibView compiles standalone.
-class AppManager: ObservableObject {
-    @Published var selectedApp: AppInfo?
-    @Published var containerPath: String?
-    @Published var apps: [AppInfo] = []
-    @Published var isLoading: Bool = false
-
-    var deviceUUID: String {
-        UIDevice.current.identifierForVendor?.uuidString ?? "Unknown"
-    }
-}
-
 // MARK: - Tab identifiers
-// Mirror whatever enum 3105 uses for AppSection.
-// Add .inject to the existing set — do not renumber existing cases.
 enum AppSection: Int, CaseIterable {
     case dashboard  = 0
     case files      = 1
     case patch      = 2
     case cleaner    = 3
     case wallpaper  = 4
-    case inject     = 5   // NEW
+    case inject     = 5
     case settings   = 6
 }
 
@@ -52,7 +25,7 @@ struct ContentView: View {
 
             // ─── Dashboard ────────────────────────────────────────────────
             NavigationView {
-                // Replace with real DashboardView from 3105
+                // Thay bằng view thật của 3105
                 Text("Dashboard")
                     .navigationTitle("3105")
             }
@@ -61,17 +34,15 @@ struct ContentView: View {
 
             // ─── Files / App Data Browser ─────────────────────────────────
             NavigationView {
-                // Replace with real AppDataBrowserView(appManager: appManager)
-                Text("Files")
-                    .navigationTitle("Files")
+                AppDataBrowserView(appManager: appManager)
+                    .navigationTitle("Apps")
             }
-            .tabItem { Label("Files", systemImage: "folder.fill") }
+            .tabItem { Label("Apps", systemImage: "folder.fill") }
             .tag(AppSection.files)
 
             // ─── Patch ────────────────────────────────────────────────────
             NavigationView {
-                // Replace with real PatchProjectsView()
-                Text("Patch")
+                PatchProjectsView()
                     .navigationTitle("Patch")
             }
             .tabItem { Label("Patch", systemImage: "wrench.and.screwdriver.fill") }
@@ -79,8 +50,7 @@ struct ContentView: View {
 
             // ─── Cleaner ──────────────────────────────────────────────────
             NavigationView {
-                // Replace with real CleanerView()
-                Text("Cleaner")
+                CleanerView()
                     .navigationTitle("Cleaner")
             }
             .tabItem { Label("Cleaner", systemImage: "trash.fill") }
@@ -88,14 +58,13 @@ struct ContentView: View {
 
             // ─── WallpaperLab ─────────────────────────────────────────────
             NavigationView {
-                // Replace with real WallpaperLabView()
-                Text("Wallpaper")
+                WallpaperLabView()
                     .navigationTitle("Wallpaper")
             }
             .tabItem { Label("Wallpaper", systemImage: "photo.fill") }
             .tag(AppSection.wallpaper)
 
-            // ─── Inject (NEW) ─────────────────────────────────────────────
+            // ─── Inject (MỚI) ─────────────────────────────────────────────
             NavigationView {
                 InjectDylibView(appManager: appManager)
                     .navigationTitle("Inject")
@@ -106,13 +75,43 @@ struct ContentView: View {
 
             // ─── Settings ─────────────────────────────────────────────────
             NavigationView {
-                // Replace with real SettingsView()
-                Text("Settings")
+                SettingsView()
                     .navigationTitle("Settings")
             }
-            .tabItem { Label("Settings", systemImage: "gear") }
+            .tabItem { Label("Settings", systemimage: "gear") }
             .tag(AppSection.settings)
         }
         .accentColor(Color(hex: "#0a84ff"))
+        .onAppear {
+            // Tải danh sách app khi mở
+            appManager.loadApps()
+        }
+    }
+}
+
+// MARK: - Color Extension (cho hex)
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3:
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6:
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8:
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (255, 0, 0, 0)
+        }
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue: Double(b) / 255,
+            opacity: Double(a) / 255
+        )
     }
 }
